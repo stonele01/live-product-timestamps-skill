@@ -1,0 +1,6 @@
+funasr==1.4.16
+soundfile==0.14.0
+sentencepiece==0.2.2
+packaging==26.2
+faster-whisper==1.2.1
+ctranslate2==4.8.0
