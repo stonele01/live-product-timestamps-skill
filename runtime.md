@@ -53,7 +53,7 @@ Agent 阅读所有目标阅读包后，输出每段的 start/end（原片秒数�
 python review_medium.py --audio audio.wav --model models/faster-whisper-medium --ranges review-ranges.json --output review-01
 ```
 
-复核模型是已有的 CTranslate2 格式 faster-whisper medium，使用本地离线加载。该脚本用 batch=1、beam=1 作第二次识别；冲突仍需原声/画面确认，不能自动认定 medium 正确。默认先由 Agent 完整核查文字，根据具体疑点决定是否运行 medium。没有运行时报告未运行，不将主 Agent 的文字判断称为听音确认。
+复核模型是已有的 CTranslate2 格式 faster-whisper medium，使用本地离线加载。该脚本用 batch=1、beam=1 作第二次识别；冲突仍需原声/画面确认，不能自动认定 medium 正确。默认先由当前模型完整核查文字，根据具体疑点决定是否运行 medium。没有运行时报告未运行，不将文字判断称为听音确认。
 
 ## Windows 兼容细节
 
