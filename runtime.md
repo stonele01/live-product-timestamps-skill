@@ -27,7 +27,21 @@ python transcribe.py --audio audio.wav --model models/SenseVoiceSmall --output r
 
 可以按字词时间中点归属核心窗口的规则合并重叠词，但应人工检查窗口接缝；不同窗口的识别和对齐并不保证完全一致。
 
-## 疑点复核
+## Agent 阅读与商品整理
+
+已经有同一原片的 SenseVoice JSONL 时直接复用，无需重新跑 ASR：
+
+```sh
+python prepare_review.py --segments run-01/segments.jsonl --output reading-01 --chunk-seconds 900 --context-seconds 60
+```
+
+此脚本处理完整 JSONL，检查核心窗口连续性与字词时间，按时间中点归属核心窗口，再生成完整文字阅读包；不作语义摘要或自动删口播。`manifest.json` 标出覆盖范围与没有归属字词的窗口，空段需判断是静音/背景音乐还是漏识别。阅读包前后文会重复，汇总时按核心范围与商品身份去重。
+
+Agent 阅读所有目标阅读包后，输出每段的 start/end（原片秒数）、描述性 name、type（正式讲解/返场/预告/提及）、带时间的原文 evidence、uncertainties、clipped_start/clipped_end，以及 review_ranges。输入 WAV 从原片中途提取时需另加已确认偏移。句子或 20 秒窗口的边界不能直接视作产品边界，句内换品须进一步查字词时间和上下文。
+
+对小样先冻结 Agent 独立结果，再与旧索引对照。参考索引不得提前发给负责独立提取的 Agent。样本边缘的截断段只报告可见范围；“首次在样本出现”不等于“首次在整场出现”。
+
+## 可选的第二次 ASR
 
 建立 review-ranges.json：
 
@@ -39,7 +53,7 @@ python transcribe.py --audio audio.wav --model models/SenseVoiceSmall --output r
 python review_medium.py --audio audio.wav --model models/faster-whisper-medium --ranges review-ranges.json --output review-01
 ```
 
-复核模型是已有的 CTranslate2 格式 faster-whisper medium，使用本地离线加载。该脚本用 batch=1、beam=1 作第二次识别；冲突仍需原声/画面确认，不能自动认定 medium 正确。复核区间应有具体原因，避免又把全场用 medium 重跑。
+复核模型是已有的 CTranslate2 格式 faster-whisper medium，使用本地离线加载。该脚本用 batch=1、beam=1 作第二次识别；冲突仍需原声/画面确认，不能自动认定 medium 正确。默认先由 Agent 完整核查文字，根据具体疑点决定是否运行 medium。没有运行时报告未运行，不将主 Agent 的文字判断称为听音确认。
 
 ## Windows 兼容细节
 
